@@ -13,13 +13,13 @@ int requestedRuleNumber;
 float drawScaleFactor;
 
 void setup() {
-  size(600, 450);
-  frameRate(60);
+  size(600, 450);//(900, 675);
+  frameRate(150);
   background(255);
   ellipseMode(CORNER);
-  requestedCellsPerGeneration = 300;
-  requestedRuleNumber = 12;
-  drawScaleFactor = 0.9;
+  requestedCellsPerGeneration = 150;
+  requestedRuleNumber = 57;//(int)(Math.random()*255)94, 181
+  drawScaleFactor = 01;
   c = new CellularAutomaton(requestedCellsPerGeneration, requestedRuleNumber);
 }
 
@@ -28,7 +28,7 @@ void draw() {
     c.show();
     c.evolve();
   } else {
-    //c.showLabel();  // TODO: uncomment this line after the rest of your code is done
+    c.showLabel();  // TODO: uncomment this line after the rest of your code is done
     noLoop();
   }
 }
@@ -52,6 +52,18 @@ class CellularAutomaton {
    */
   public CellularAutomaton(int n, int r) {
     // TODO: implement this constructor
+    currentGenerationNumber = 0;
+    canGrow = true;
+    ruleNumber = r;
+    cellArray = new String[n];
+
+    for (int i = 0; i < cellArray.length; i++) {
+      if ( i == n/2) {
+        cellArray[i] = "1";
+      } else {
+        cellArray[i] = "0";
+      }
+    }
   }
 
   public void updateCurrentGenerationNumber() {
@@ -77,6 +89,15 @@ class CellularAutomaton {
    */
   public void setRuleNumber(int n) {
     // TODO: implement this method
+    if ( 0 <= n && n <= 255) {
+      ruleNumber = n;
+    } else {
+      if (n < 0) {
+        ruleNumber = 0;
+      } else if (n > 255) {
+        ruleNumber = 255;
+      }
+    }
   }
 
   public int getRuleNumber() {
@@ -92,8 +113,10 @@ class CellularAutomaton {
    */
   public String getRulePatternAsString() {
     String output = Integer.toBinaryString(getRuleNumber());
-    // TODO: finish implementing this method
-    return "";
+    while (output.length() < 8) {
+      output = "0" + output;
+    }
+    return output;
   }
 
   /**
@@ -105,7 +128,10 @@ class CellularAutomaton {
    */
   public String[] getRulePatternAsArray() {
     String[] output = new String[8];
-    // TODO: finish implementing this method
+    String s = getRulePatternAsString();
+    for (int i = 0; i < s.length(); i++) {
+      output[i] = s.substring(i, i+1);
+    }
     return output;
   }
 
@@ -129,9 +155,11 @@ class CellularAutomaton {
   private void updateCellArray() {
     String[] newArray = new String[cellArray.length];
     for (int i = 1; i < newArray.length - 1; i++) {
-      newArray[i] = getNewCellState("000");   // TODO: replace "000" with something more appropriate
+      newArray[i] = getNewCellState(cellArray[i-1] + cellArray[i] + cellArray[i+1]);
     }
-    // TODO: finish implementing this method
+    newArray[0] = "0";
+    newArray[newArray.length-1] = "0";
+    cellArray = newArray;
   }
 
   /**
@@ -144,10 +172,22 @@ class CellularAutomaton {
    */
   private String getNewCellState(String neighborhood) {
     String[] arr = getRulePatternAsArray();
-    if (neighborhood == "111") {      // TODO: fix this so it uses a correct String comparison method
+    if (neighborhood.equals("111")) {    
       return arr[0];
+    } else if (neighborhood.equals("110")) {
+      return arr[1];
+    } else if (neighborhood.equals("101")) {
+      return arr[2];
+    } else if (neighborhood.equals("100")) {
+      return arr[3];
+    } else if (neighborhood.equals("011")) {
+      return arr[4];
+    } else if (neighborhood.equals("010")) {
+      return arr[5];
+    } else if (neighborhood.equals("001")) {
+      return arr[6];
     } else {
-      return "0";
+      return arr[7];
     }
     // TODO: change this method so it handles all possible 3-digit neighborhoods
   }
@@ -162,8 +202,15 @@ class CellularAutomaton {
 
   public void show() {
     for (int i = 0; i < cellArray.length; i++) {
-      if (true) {  // TODO: replace true with a useful predicate
-        fill(#952424);
+      if (cellArray[i].equals("1")) { 
+        int m = (int)(Math.random()* 7);
+        if (m == 1 || m == 3 || m == 5) {
+          fill(0);
+        } else if (m == 0) {
+          fill(0, 0, 255);
+        } else { 
+          fill(255, 0, 0);
+        }
         noStroke();
         rect(i * getCellSize(), 30 + getCurrentGenerationNumber() * getCellSize(), getDrawSize(), getDrawSize());
       }
